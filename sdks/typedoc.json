@@ -1,0 +1,6 @@
+{
+  "entryPoints": [
+    "packages/midan/src/index.ts"
+  ],
+  "out": "docs"
+}

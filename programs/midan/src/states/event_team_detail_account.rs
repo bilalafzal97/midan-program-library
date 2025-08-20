@@ -1,5 +1,5 @@
+use crate::states::{EventTeamStatus, EventTeamType, HaveLimitValue};
 use anchor_lang::prelude::*;
-use crate::states::{EventType, EventStatus, HaveLimitValue, EventTeamType, EventTeamStatus};
 
 pub const EVENT_TEAM_DETAIL_ACCOUNT_PREFIX: &str = "TEAM";
 
@@ -11,7 +11,7 @@ pub struct EventTeamDetailAccount {
     pub authority: Pubkey,
 
     pub creator_key: Pubkey,
-    
+
     pub index: u32,
 
     pub event_team_type: EventTeamType,
@@ -24,7 +24,7 @@ pub struct EventTeamDetailAccount {
 
     pub team_url: String,
 
-    pub code_hash: [u8; 32]
+    pub code_hash: [u8; 32],
 }
 
 impl EventTeamDetailAccount {

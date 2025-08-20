@@ -6,11 +6,15 @@ import {
     PublicKey,
 } from "@solana/web3.js";
 import {
-    getEventDetailAccountPdaAndBump,
+    getEventDetailAccountPdaAndBump, getEventTeamDetailAccountPdaAndBump, getEventTeamMemberDetailAccountPdaAndBump,
     getProgramConfigAccountPdaAndBump
 } from "./midan-pda-and-data";
-import {EventStatus, EventStatusType, EventType, EventTypeType, ProgramStatusType} from "./midan-enum";
-import {createAssociatedTokenAccount, getAssociatedTokenAddress} from "@solana/spl-token";
+import {
+    EventStatusType, EventTeamMemberStatusType, EventTeamStatusType,
+    EventTeamTypeType,
+    EventTypeType,
+    ProgramStatusType
+} from "./midan-enum";
 import {codeHash} from "./midan-helper";
 
 export async function initializeTx(
@@ -20,14 +24,14 @@ export async function initializeTx(
     systemProgram: PublicKey,
     rent: PublicKey,
     signers: Keypair[]) {
-    const [programConfigPad] = getProgramConfigAccountPdaAndBump(program.programId);
-    console.log("programConfigPad: ", programConfigPad.toBase58());
+    const [programConfigPda] = getProgramConfigAccountPdaAndBump(program.programId);
+    console.log("programConfigPda: ", programConfigPda.toBase58());
 
     const tx = await program.methods.initialize({})
         .accounts({
             feeAndRentPayer: feePayer,
             mainSigningAuthority: mainSigningAuthority,
-            programConfig: programConfigPad,
+            programConfig: programConfigPda,
             systemProgram: systemProgram,
             rent: rent
         })
@@ -43,8 +47,8 @@ export async function updateProgramStatusTx(
     programStatus: ProgramStatusType,
     signers: Keypair[]) {
 
-    const [programConfigPad, programConfigBump] = getProgramConfigAccountPdaAndBump(program.programId);
-    console.log("programConfigPad: ", programConfigPad.toBase58());
+    const [programConfigPda, programConfigBump] = getProgramConfigAccountPdaAndBump(program.programId);
+    console.log("programConfigPda: ", programConfigPda.toBase58());
 
     const tx = await program.methods.updateProgramStatus({
         programStatus: programStatus,
@@ -52,7 +56,7 @@ export async function updateProgramStatusTx(
     })
         .accounts({
             mainSigningAuthority: mainSigningAuthority,
-            programConfig: programConfigPad,
+            programConfig: programConfigPda,
         })
         .signers(signers)
         .rpc();
@@ -68,13 +72,13 @@ export async function initializeEventTx(
     eventType: EventTypeType,
     eventUrl: string,
     code: string,
-    teamLimit: number,
-    memberLimit: number,
+    teamLimit: number | null,
+    memberLimit: number | null,
     systemProgram: PublicKey,
     rent: PublicKey,
     signers: Keypair[]) {
-    const [programConfigPad] = getProgramConfigAccountPdaAndBump(program.programId);
-    console.log("programConfigPad: ", programConfigPad.toBase58());
+    const [programConfigPda] = getProgramConfigAccountPdaAndBump(program.programId);
+    console.log("programConfigPda: ", programConfigPda.toBase58());
 
     const [eventDetailPda] = getEventDetailAccountPdaAndBump(program.programId, creatorKey);
     console.log("eventDetailPda: ", eventDetailPda.toBase58());
@@ -98,7 +102,7 @@ export async function initializeEventTx(
         })
         .remainingAccounts([
             {
-                pubkey: programConfigPad,
+                pubkey: programConfigPda,
                 isSigner: false,
                 isWritable: false
             }
@@ -114,17 +118,21 @@ export async function updateEventTx(
     authority: PublicKey,
     creatorKey: PublicKey,
     eventStatus: EventStatusType,
+    code: string,
     signers: Keypair[]) {
-    const [programConfigPad] = getProgramConfigAccountPdaAndBump(program.programId);
-    console.log("programConfigPad: ", programConfigPad.toBase58());
+    const [programConfigPda] = getProgramConfigAccountPdaAndBump(program.programId);
+    console.log("programConfigPda: ", programConfigPda.toBase58());
 
     const [eventDetailPda, eventDetailBump] = getEventDetailAccountPdaAndBump(program.programId, creatorKey);
     console.log("eventDetailPda: ", eventDetailPda.toBase58());
 
+    const hash = codeHash(code);
+
     const tx = await program.methods.updateEvent({
         creatorKey: creatorKey,
         eventStatus: eventStatus,
-        eventDetailBump: eventDetailBump
+        eventDetailBump: eventDetailBump,
+        codeHash: Array.from(hash)
     })
         .accounts({
             authority: authority,
@@ -132,7 +140,210 @@ export async function updateEventTx(
         })
         .remainingAccounts([
             {
-                pubkey: programConfigPad,
+                pubkey: programConfigPda,
+                isSigner: false,
+                isWritable: false
+            }
+        ])
+        .signers(signers)
+        .rpc();
+
+    console.log("Your transaction signature", tx);
+}
+
+export async function initializeEventTeamTx(
+    program: Program<Midan>,
+    feePayer: PublicKey,
+    authority: PublicKey,
+    creatorKey: PublicKey,
+    eventTeamType: EventTeamTypeType,
+    eventTeamUrl: string,
+    teamIndex: number,
+    teamCode: string,
+    memberLimit: number | null,
+    eventCode: string,
+    systemProgram: PublicKey,
+    rent: PublicKey,
+    signers: Keypair[]) {
+    const [programConfigPda] = getProgramConfigAccountPdaAndBump(program.programId);
+    console.log("programConfigPda: ", programConfigPda.toBase58());
+
+    const [eventDetailPda, eventDetailBump] = getEventDetailAccountPdaAndBump(program.programId, creatorKey);
+    console.log("eventDetailPda: ", eventDetailPda.toBase58());
+
+    const [eventTeamDetailPda] = getEventTeamDetailAccountPdaAndBump(program.programId, eventDetailPda, teamIndex);
+    console.log("eventTeamDetailPda: ", eventTeamDetailPda.toBase58());
+
+    const [eventTeamMemberDetailPda] = getEventTeamMemberDetailAccountPdaAndBump(program.programId, eventDetailPda, authority);
+    console.log("eventTeamMemberDetailPda: ", eventTeamMemberDetailPda.toBase58());
+
+    const hash = codeHash(teamCode);
+
+    const tx = await program.methods.initializeEventTeam({
+        url: eventTeamUrl,
+        memberLimit: memberLimit,
+        creatorKey: creatorKey,
+        eventTeamType: eventTeamType,
+        codeHash: Array.from(hash),
+        eventCode: eventCode,
+        eventDetailBump: eventDetailBump
+    })
+        .accounts({
+            feeAndRentPayer: feePayer,
+            authority: authority,
+            eventDetail: eventDetailPda,
+            eventTeamDetail: eventTeamDetailPda,
+            eventTeamMemberDetail: eventTeamMemberDetailPda,
+            systemProgram: systemProgram,
+            rent: rent
+        })
+        .remainingAccounts([
+            {
+                pubkey: programConfigPda,
+                isSigner: false,
+                isWritable: false
+            }
+        ])
+        .signers(signers)
+        .rpc();
+
+    console.log("Your transaction signature", tx);
+}
+
+export async function updateEventTeamTx(
+    program: Program<Midan>,
+    authority: PublicKey,
+    creatorKey: PublicKey,
+    eventTeamStatus: EventTeamStatusType,
+    teamIndex: number,
+    teamCode: string,
+    signers: Keypair[]) {
+    const [programConfigPda] = getProgramConfigAccountPdaAndBump(program.programId);
+    console.log("programConfigPda: ", programConfigPda.toBase58());
+
+    const [eventDetailPda, eventDetailBump] = getEventDetailAccountPdaAndBump(program.programId, creatorKey);
+    console.log("eventDetailPda: ", eventDetailPda.toBase58());
+
+    const [eventTeamDetailPda, eventTeamDetailBump] = getEventTeamDetailAccountPdaAndBump(program.programId, eventDetailPda, teamIndex);
+    console.log("eventTeamDetailPda: ", eventTeamDetailPda.toBase58());
+
+    const hash = codeHash(teamCode);
+
+    const tx = await program.methods.updateEventTeam({
+        creatorKey: creatorKey,
+        eventTeamStatus: eventTeamStatus,
+        eventTeamIndex: teamIndex,
+        codeHash: Array.from(hash),
+        eventDetailBump: eventDetailBump,
+        eventTeamDetailBump: eventTeamDetailBump
+    })
+        .accounts({
+            authority: authority,
+            eventDetail: eventDetailPda,
+            eventTeamDetail: eventTeamDetailPda,
+        })
+        .remainingAccounts([
+            {
+                pubkey: programConfigPda,
+                isSigner: false,
+                isWritable: false
+            }
+        ])
+        .signers(signers)
+        .rpc();
+
+    console.log("Your transaction signature", tx);
+}
+
+export async function initializeEventMemberTeamTx(
+    program: Program<Midan>,
+    feePayer: PublicKey,
+    member: PublicKey,
+    creatorKey: PublicKey,
+    teamIndex: number,
+    teamCode: string,
+    systemProgram: PublicKey,
+    rent: PublicKey,
+    signers: Keypair[]) {
+    const [programConfigPda] = getProgramConfigAccountPdaAndBump(program.programId);
+    console.log("programConfigPda: ", programConfigPda.toBase58());
+
+    const [eventDetailPda, eventDetailBump] = getEventDetailAccountPdaAndBump(program.programId, creatorKey);
+    console.log("eventDetailPda: ", eventDetailPda.toBase58());
+
+    const [eventTeamDetailPda, eventTeamDetailBump] = getEventTeamDetailAccountPdaAndBump(program.programId, eventDetailPda, teamIndex);
+    console.log("eventTeamDetailPda: ", eventTeamDetailPda.toBase58());
+
+    const [eventTeamMemberDetailPda] = getEventTeamMemberDetailAccountPdaAndBump(program.programId, eventDetailPda, member);
+    console.log("eventTeamMemberDetailPda: ", eventTeamMemberDetailPda.toBase58());
+
+    const tx = await program.methods.initializeEventTeamMember({
+        creatorKey: creatorKey,
+        eventTeamIndex: teamIndex,
+        teamCode: teamCode,
+        eventDetailBump: eventDetailBump,
+        eventTeamDetailBump: eventTeamDetailBump
+    })
+        .accounts({
+            feeAndRentPayer: feePayer,
+            member: member,
+            eventDetail: eventDetailPda,
+            eventTeamDetail: eventTeamDetailPda,
+            eventTeamMemberDetail: eventTeamMemberDetailPda,
+            systemProgram: systemProgram,
+            rent: rent
+        })
+        .remainingAccounts([
+            {
+                pubkey: programConfigPda,
+                isSigner: false,
+                isWritable: false
+            }
+        ])
+        .signers(signers)
+        .rpc();
+
+    console.log("Your transaction signature", tx);
+}
+
+export async function updateEventMemberTeamTx(
+    program: Program<Midan>,
+    authority: PublicKey,
+    member: PublicKey,
+    creatorKey: PublicKey,
+    teamIndex: number,
+    eventTeamMemberStatus: EventTeamMemberStatusType,
+    signers: Keypair[]) {
+    const [programConfigPda] = getProgramConfigAccountPdaAndBump(program.programId);
+    console.log("programConfigPda: ", programConfigPda.toBase58());
+
+    const [eventDetailPda, eventDetailBump] = getEventDetailAccountPdaAndBump(program.programId, creatorKey);
+    console.log("eventDetailPda: ", eventDetailPda.toBase58());
+
+    const [eventTeamDetailPda, eventTeamDetailBump] = getEventTeamDetailAccountPdaAndBump(program.programId, eventDetailPda, teamIndex);
+    console.log("eventTeamDetailPda: ", eventTeamDetailPda.toBase58());
+
+    const [eventTeamMemberDetailPda, eventTeamMemberDetailBump] = getEventTeamMemberDetailAccountPdaAndBump(program.programId, eventDetailPda, member);
+    console.log("eventTeamMemberDetailPda: ", eventTeamMemberDetailPda.toBase58());
+
+    const tx = await program.methods.updateEventTeamMember({
+        creatorKey: creatorKey,
+        member: member,
+        eventTeamIndex: teamIndex,
+        eventTeamMemberStatus: eventTeamMemberStatus,
+        eventDetailBump: eventDetailBump,
+        eventTeamDetailBump: eventTeamDetailBump,
+        eventTeamMemberDetailBump: eventTeamMemberDetailBump
+    })
+        .accounts({
+            authority: authority,
+            eventDetail: eventDetailPda,
+            eventTeamDetail: eventTeamDetailPda,
+            eventTeamMemberDetail: eventTeamMemberDetailPda,
+        })
+        .remainingAccounts([
+            {
+                pubkey: programConfigPda,
                 isSigner: false,
                 isWritable: false
             }

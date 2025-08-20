@@ -134,11 +134,19 @@ pub fn check_member_limit(total_members: u32, from_account: u32) -> Result<()> {
     Ok(())
 }
 
-pub fn check_is_only_private_team(eventType: EventType, eventTeamType: EventTeamType) -> Result<()> {
+pub fn check_is_only_private_team(event_type: EventType, event_team_type: EventTeamType) -> Result<()> {
 
 
-    if eventType.eq(&EventType::PrivateWithTeam) && eventTeamType.eq(&EventTeamType::Public) {
+    if event_type.eq(&EventType::PrivateWithTeam) && event_team_type.eq(&EventTeamType::Public) {
         return Err(MidanError::OnlyPrivateTeam.into());
+    }
+
+    Ok(())
+}
+
+pub fn check_team(from_account: Pubkey, from_context: Pubkey) -> Result<()> {
+    if from_account != from_context {
+        return Err(MidanError::InvalidTeam.into());
     }
 
     Ok(())

@@ -10,12 +10,22 @@ import {
 } from "@solana/web3.js";
 
 import {
-    getEventDetailAccountData, getEventDetailAccountPdaAndBump,
+    getEventDetailAccountData,
+    getEventDetailAccountPdaAndBump,
+    getEventTeamDetailAccountData,
+    getEventTeamDetailAccountPdaAndBump, getEventTeamMemberDetailAccountData, getEventTeamMemberDetailAccountPdaAndBump,
     getProgramConfigAccountData,
     getProgramConfigAccountPdaAndBump,
 } from "./midan-pda-and-data";
 
-import {EventStatusType, EventTypeType, ProgramStatusType} from "./midan-enum";
+import {
+    EventStatusType, EventTeamMemberStatusType,
+    EventTeamMemberTypeType,
+    EventTeamStatusType,
+    EventTeamTypeType,
+    EventTypeType,
+    ProgramStatusType
+} from "./midan-enum";
 
 import {getAssociatedTokenAddress} from "@solana/spl-token";
 import {codeHash} from "./midan-helper";
@@ -121,4 +131,74 @@ export async function assertEventDetailAccount(
 
     assert(data.totalTeams === totalTeams, "Event detail -> totalTeams");
     assert(data.totalMembers === totalMembers, "Event detail -> totalMembers");
+}
+
+export async function assertEventTeamDetailAccount(
+    program: Program<Midan>,
+    creatorKey: PublicKey,
+    authority: PublicKey,
+    teamIndex: number,
+    eventTeamType: EventTeamTypeType,
+    eventTeamStatus: EventTeamStatusType,
+    teamUrl: string,
+    code: string,
+    haveMemberLimit: boolean,
+    memberLimit: number,
+    totalMembers: number,
+) {
+    const [eventDetailPda] = getEventDetailAccountPdaAndBump(program.programId, creatorKey);
+    console.log("eventDetailPda: ", eventDetailPda.toBase58());
+
+    const [eventTeamDetailPda] = getEventTeamDetailAccountPdaAndBump(program.programId, eventDetailPda, teamIndex);
+    console.log("eventTeamDetailPda: ", eventTeamDetailPda.toBase58());
+
+    const data = await getEventTeamDetailAccountData(program, creatorKey, teamIndex);
+
+    console.log("Event Team detail account: >>>>>>>> ", data);
+
+    assert(data.lastBlockTimestamp.toNumber() !== 0, "Event Team detail -> lastBlockTimestamp");
+    assert(data.authority.toBase58() === authority.toBase58(), "Event Team detail -> authority");
+    assert(data.index === teamIndex, "Event Team detail -> index");
+    assert(JSON.stringify(data.eventTeamType) === JSON.stringify(eventTeamType), "Event Team detail -> eventTeamType");
+    assert(JSON.stringify(data.eventTeamStatus) === JSON.stringify(eventTeamStatus), "Event Team detail -> eventTeamStatus");
+    assert(data.teamUrl === teamUrl, "Event Team detail -> teamUrl");
+
+    const hash = (Buffer.from(codeHash(code))).toString("hex");
+    assert((Buffer.from(new Uint8Array(data.codeHash))).toString("hex") === hash, "Event Team detail -> codeHash");
+
+    assert(data.memberLimit.haveIt === haveMemberLimit, "Event Team detail -> haveMemberLimit");
+    assert(data.memberLimit.value === memberLimit, "Event Team detail -> memberLimit");
+
+    assert(data.totalMembers === totalMembers, "Event Team detail -> totalMembers");
+}
+
+export async function assertEventTeamMemberDetailAccount(
+    program: Program<Midan>,
+    creatorKey: PublicKey,
+    teamIndex: number,
+    member: PublicKey,
+    memberIndex: number,
+    eventTeamMemberType: EventTeamMemberTypeType,
+    eventTeamMemberStatus: EventTeamMemberStatusType,
+) {
+    const [eventDetailPda] = getEventDetailAccountPdaAndBump(program.programId, creatorKey);
+    console.log("eventDetailPda: ", eventDetailPda.toBase58());
+
+    const [eventTeamDetailPda] = getEventTeamDetailAccountPdaAndBump(program.programId, eventDetailPda, teamIndex);
+    console.log("eventTeamDetailPda: ", eventTeamDetailPda.toBase58());
+
+    const [eventTeamMemberDetailPda] = getEventTeamMemberDetailAccountPdaAndBump(program.programId, eventDetailPda, member);
+    console.log("eventTeamMemberDetailPda: ", eventTeamMemberDetailPda.toBase58());
+
+    const data = await getEventTeamMemberDetailAccountData(program, creatorKey, member);
+
+    console.log("Event Team Member detail account: >>>>>>>> ", data);
+
+    assert(data.lastBlockTimestamp.toNumber() !== 0, "Event Team Member detail -> lastBlockTimestamp");
+    assert(data.creatorKey.toBase58() === creatorKey.toBase58(), "Event Team Member detail -> creatorKey");
+    assert(data.team.toBase58() === eventTeamDetailPda.toBase58(), "Event Team Member detail -> team");
+    assert(data.member.toBase58() === member.toBase58(), "Event Team Member detail -> member");
+    assert(data.index === memberIndex, "Event Team Member detail -> index");
+    assert(JSON.stringify(data.eventTeamMemberType) === JSON.stringify(eventTeamMemberType), "Event Team Member detail -> eventTeamMemberType");
+    assert(JSON.stringify(data.eventTeamMemberStatus) === JSON.stringify(eventTeamMemberStatus), "Event Team Member detail -> eventTeamMemberStatus");
 }

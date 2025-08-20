@@ -43,4 +43,8 @@ pub enum MidanError {
 
     #[msg("Only private team")]
     OnlyPrivateTeam,
+
+    #[msg("Invalid team")]
+    InvalidTeam,
+    
 }

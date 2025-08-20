@@ -1,20 +1,20 @@
 use anchor_lang::prelude::*;
-
+use crate::events::UpdateEventEvent;
 use crate::states::{
-    EventDetailAccount, EventStatus, EventType, ProgramConfigAccount, ProgramStatus,
-    EVENT_DETAIL_ACCOUNT_PREFIX, PROGRAM_CONFIG_ACCOUNT_PREFIX,
+    EventDetailAccount, EventStatus, ProgramConfigAccount, EVENT_DETAIL_ACCOUNT_PREFIX,
 };
 use crate::utils::{
-    check_authority, check_is_program_working, check_program_id, check_url, check_value_is_zero,
-    try_get_remaining_account_info,
+    check_authority, check_is_program_working, check_program_id, try_get_remaining_account_info,
 };
 
 #[repr(C)]
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct UpdateEventInputParams {
-    creator_key: Pubkey,
+    pub creator_key: Pubkey,
 
-    event_status: EventStatus,
+    pub event_status: EventStatus,
+
+    pub code_hash: [u8; 32],
 
     // bumps
     pub event_detail_bump: u8,
@@ -63,7 +63,10 @@ pub fn handle_update_event<'info>(
     let event_detail: &Box<Account<EventDetailAccount>> = &ctx.accounts.event_detail;
 
     check_authority(
-        vec![event_detail.authority],
+        vec![
+            event_detail.authority,
+            program_config.main_signing_authority,
+        ],
         ctx.accounts.authority.key(),
     )?;
 
@@ -71,6 +74,17 @@ pub fn handle_update_event<'info>(
     let event_detail: &mut Box<Account<EventDetailAccount>> = &mut ctx.accounts.event_detail;
     event_detail.last_block_timestamp = timestamp;
     event_detail.event_status = params.event_status.clone();
+    event_detail.code_hash = params.code_hash.clone();
 
+    // Event
+    let event: UpdateEventEvent = UpdateEventEvent {
+        timestamp,
+        creator_key: params.creator_key,
+        authority: ctx.accounts.authority.key(),
+        event_status: params.event_status.clone(),
+    };
+
+    emit!(event);
+    
     Ok(())
 }

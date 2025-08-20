@@ -1,0 +1,42 @@
+{
+  "name": "@mirrorworld/sonic.midan",
+  "version": "0.0.1",
+  "description": "Midan program SDK",
+  "keywords": [],
+  "author": "Bilal Afzal <bilal@mirrorworld.fun>",
+  "license": "MIT",
+  "main": "dist/mirrorworld-sonic.midan.cjs.js",
+  "module": "dist/mirrorworld-sonic.midan.esm.js",
+  "types": "dist/mirrorworld-sonic.midan.cjs.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/mirrorworld-sonic.midan.cjs.js",
+      "types": "./dist/mirrorworld-sonic.midan.cjs.d.ts",
+      "default": "./dist/mirrorworld-sonic.midan.esm.js"
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.23",
+    "ts-node": "^10.7.0",
+    "tslib": "^2.3.1",
+    "tsutils": "^3.21.0",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "bs58": "^5.0.0",
+    "tweetnacl": "^1.0.3",
+    "@solana/web3.js": "1.98.4",
+    "@coral-xyz/anchor": "^0.29.0",
+    "@solana/spl-token": "0.3.10",
+    "@noble/curves": "^1.8.1",
+    "ethereum-cryptography": "^2.2.0",
+    "@metaplex-foundation/mpl-token-metadata": "2.11.0",
+    "@metaplex-foundation/beet": "0.7.2"
+  },
+  "scripts": {
+    "clean": "rimraf dist"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

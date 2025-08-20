@@ -45,6 +45,34 @@ pub mod midan {
     ) -> Result<()> {
         handle_update_event(ctx, &params)
     }
+
+    pub fn initialize_event_team<'info>(
+        ctx: Context<'_, '_, 'info, 'info, InitializeEventTeamInputAccounts<'info>>,
+        params: InitializeEventTeamInputParams,
+    ) -> Result<()> {
+        handle_initialize_event_team(ctx, &params)
+    }
+
+    pub fn update_event_team<'info>(
+        ctx: Context<'_, '_, 'info, 'info, UpdateEventTeamInputAccounts<'info>>,
+        params: UpdateEventTeamInputParams,
+    ) -> Result<()> {
+        handle_update_event_team(ctx, &params)
+    }
+
+    pub fn initialize_event_team_member<'info>(
+        ctx: Context<'_, '_, 'info, 'info, InitializeEventTeamMemberInputAccounts<'info>>,
+        params: InitializeEventTeamMemberInputParams,
+    ) -> Result<()> {
+        handle_initialize_event_team_member(ctx, &params)
+    }
+
+    pub fn update_event_team_member<'info>(
+        ctx: Context<'_, '_, 'info, 'info, UpdateEventTeamMemberInputAccounts<'info>>,
+        params: UpdateEventTeamMemberInputParams,
+    ) -> Result<()> {
+        handle_update_event_team_member(ctx, &params)
+    }
 }
 
 #[derive(Accounts)]

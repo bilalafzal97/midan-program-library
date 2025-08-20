@@ -11,9 +11,35 @@ import base58 from "bs58";
 import {delay, requestToken} from "./midan-helper";
 
 import {Midan} from "../target/types/midan";
-import {initializeEventTx, initializeTx, updateEventTx, updateProgramStatusTx} from "./midan-client";
-import {EventStatus, EventType, ProgramStatus, ProgramStatusType} from "./midan-enum";
-import {assertEventDetailAccount, assertProgramConfigAccount} from "./midan-assert";
+import {
+    initializeEventMemberTeamTx,
+    initializeEventTeamTx,
+    initializeEventTx,
+    initializeTx, updateEventMemberTeamTx, updateEventTeamTx,
+    updateEventTx,
+    updateProgramStatusTx
+} from "./midan-client";
+import {
+    EventStatus, EventTeamMemberStatus,
+    EventTeamMemberType,
+    EventTeamStatus,
+    EventTeamType,
+    EventType,
+    ProgramStatus,
+    ProgramStatusType
+} from "./midan-enum";
+import {
+    assertEventDetailAccount,
+    assertEventTeamDetailAccount,
+    assertEventTeamMemberDetailAccount,
+    assertProgramConfigAccount
+} from "./midan-assert";
+import {
+    handleInitializeEventEvent, handleInitializeEventTeamEvent, handleInitializeEventTeamMemberEvent,
+    handleUpdateEventEvent, handleUpdateEventTeamEvent, handleUpdateEventTeamMemberEvent,
+    InitializeEventEventName, InitializeEventTeamEventName, InitializeEventTeamMemberEventName,
+    UpdateEventEventName, UpdateEventTeamEventName, UpdateEventTeamMemberEventName
+} from "./midan-event";
 
 describe("midan", () => {
     // Configure the client to use the local cluster.
@@ -26,6 +52,14 @@ describe("midan", () => {
     const delayTimeCount = 1000;
 
     let connection: Connection = anchor.AnchorProvider.env().connection as any;
+
+    // Setup Events
+    const initializeEventEventListener = program.addEventListener(InitializeEventEventName, handleInitializeEventEvent);
+    const updateEventEventListener = program.addEventListener(UpdateEventEventName, handleUpdateEventEvent);
+    const initializeEventTeamEventListener = program.addEventListener(InitializeEventTeamEventName, handleInitializeEventTeamEvent);
+    const updateEventTeamEventListener = program.addEventListener(UpdateEventTeamEventName, handleUpdateEventTeamEvent);
+    const initializeEventTeamMemberEventListener = program.addEventListener(InitializeEventTeamMemberEventName, handleInitializeEventTeamMemberEvent);
+    const updateEventTeamMemberEventListener = program.addEventListener(UpdateEventTeamMemberEventName, handleUpdateEventTeamMemberEvent);
 
     const feeAndRentPayerKeypair: Keypair = Keypair.fromSecretKey(base58.decode("58HRnwnjXbmrgesdzNC9UzXJR1AjdG1UFWG4gaH2ZJQmJj3d75afPtDZy5ToEB3Zv5cgbw9kFcbQPioFScMKAG1c"));
     console.log("feeAndRentPayer: ", feeAndRentPayerKeypair.publicKey.toBase58());
@@ -56,9 +90,9 @@ describe("midan", () => {
 
     // Testing Values
 
-    const eventTeamCode = "team";
+    const eventCode = "event";
 
-    const eventTeamMemberCode = "member";
+    const eventTeamCode = "team";
 
     const eventUrl = "https://www.midan.com/event";
 
@@ -117,7 +151,7 @@ describe("midan", () => {
             creatorKeypair.publicKey,
             EventType.PrivateWithTeam,
             eventUrl,
-            eventTeamCode,
+            eventCode,
             2,
             3,
             SystemProgram.programId,
@@ -137,7 +171,7 @@ describe("midan", () => {
             EventType.PrivateWithTeam,
             EventStatus.Normal,
             eventUrl,
-            eventTeamCode,
+            eventCode,
             true,
             2,
             true,
@@ -153,6 +187,7 @@ describe("midan", () => {
             eventAuthorityKeypair.publicKey,
             creatorKeypair.publicKey,
             EventStatus.Normal,
+            eventCode,
             [
                 eventAuthorityKeypair
             ]
@@ -167,7 +202,7 @@ describe("midan", () => {
             EventType.PrivateWithTeam,
             EventStatus.Normal,
             eventUrl,
-            eventTeamCode,
+            eventCode,
             true,
             2,
             true,
@@ -175,6 +210,242 @@ describe("midan", () => {
             0,
             0
         );
+    });
+
+    it("Initialize Event Team - 1", async () => {
+        await initializeEventTeamTx(
+            program,
+            feeAndRentPayerKeypair.publicKey,
+            team1AuthorityKeypair.publicKey,
+            creatorKeypair.publicKey,
+            EventTeamType.Private,
+            teamUrl,
+            1,
+            eventTeamCode,
+            2,
+            eventCode,
+            SystemProgram.programId,
+            SYSVAR_RENT_PUBKEY,
+            [
+                feeAndRentPayerKeypair,
+                team1AuthorityKeypair
+            ]
+        );
+
+        await delay(delayTimeCount);
+
+        await assertEventDetailAccount(
+            program,
+            creatorKeypair.publicKey,
+            eventAuthorityKeypair.publicKey,
+            EventType.PrivateWithTeam,
+            EventStatus.Normal,
+            eventUrl,
+            eventCode,
+            true,
+            2,
+            true,
+            3,
+            1,
+            1
+        );
+
+        await assertEventTeamDetailAccount(
+            program,
+            creatorKeypair.publicKey,
+            team1AuthorityKeypair.publicKey,
+            1,
+            EventTeamType.Private,
+            EventTeamStatus.Normal,
+            teamUrl,
+            eventTeamCode,
+            true,
+            2,
+            1
+        );
+
+        await assertEventTeamMemberDetailAccount(
+            program,
+            creatorKeypair.publicKey,
+            1,
+            team1AuthorityKeypair.publicKey,
+            1,
+            EventTeamMemberType.Admin,
+            EventTeamMemberStatus.Normal,
+        );
+    });
+
+
+    it("Update Event Team - 1", async () => {
+        await updateEventTeamTx(
+            program,
+            team1AuthorityKeypair.publicKey,
+            creatorKeypair.publicKey,
+            EventTeamStatus.Normal,
+            1,
+            eventTeamCode,
+            [
+                team1AuthorityKeypair
+            ]
+        );
+
+        await delay(delayTimeCount);
+
+        await assertEventDetailAccount(
+            program,
+            creatorKeypair.publicKey,
+            eventAuthorityKeypair.publicKey,
+            EventType.PrivateWithTeam,
+            EventStatus.Normal,
+            eventUrl,
+            eventCode,
+            true,
+            2,
+            true,
+            3,
+            1,
+            1
+        );
+
+        await assertEventTeamDetailAccount(
+            program,
+            creatorKeypair.publicKey,
+            team1AuthorityKeypair.publicKey,
+            1,
+            EventTeamType.Private,
+            EventTeamStatus.Normal,
+            teamUrl,
+            eventTeamCode,
+            true,
+            2,
+            1
+        );
+    });
+
+    it("Initialize Event Team Member - 1", async () => {
+        await initializeEventMemberTeamTx(
+            program,
+            feeAndRentPayerKeypair.publicKey,
+            teamMember1Keypair.publicKey,
+            creatorKeypair.publicKey,
+            1,
+            eventTeamCode,
+            SystemProgram.programId,
+            SYSVAR_RENT_PUBKEY,
+            [
+                feeAndRentPayerKeypair,
+                teamMember1Keypair
+            ]
+        );
+
+        await delay(delayTimeCount);
+
+        await assertEventDetailAccount(
+            program,
+            creatorKeypair.publicKey,
+            eventAuthorityKeypair.publicKey,
+            EventType.PrivateWithTeam,
+            EventStatus.Normal,
+            eventUrl,
+            eventCode,
+            true,
+            2,
+            true,
+            3,
+            1,
+            2
+        );
+
+        await assertEventTeamDetailAccount(
+            program,
+            creatorKeypair.publicKey,
+            team1AuthorityKeypair.publicKey,
+            1,
+            EventTeamType.Private,
+            EventTeamStatus.Normal,
+            teamUrl,
+            eventTeamCode,
+            true,
+            2,
+            2
+        );
+
+        await assertEventTeamMemberDetailAccount(
+            program,
+            creatorKeypair.publicKey,
+            1,
+            teamMember1Keypair.publicKey,
+            2,
+            EventTeamMemberType.Normal,
+            EventTeamMemberStatus.Normal,
+        );
+    });
+
+    it("Update Event Team Member - 1", async () => {
+        await updateEventMemberTeamTx(
+            program,
+            team1AuthorityKeypair.publicKey,
+            teamMember1Keypair.publicKey,
+            creatorKeypair.publicKey,
+            1,
+            EventTeamMemberStatus.Normal,
+            [
+                team1AuthorityKeypair
+            ]
+        );
+
+        await delay(delayTimeCount);
+
+        await assertEventDetailAccount(
+            program,
+            creatorKeypair.publicKey,
+            eventAuthorityKeypair.publicKey,
+            EventType.PrivateWithTeam,
+            EventStatus.Normal,
+            eventUrl,
+            eventCode,
+            true,
+            2,
+            true,
+            3,
+            1,
+            2
+        );
+
+        await assertEventTeamDetailAccount(
+            program,
+            creatorKeypair.publicKey,
+            team1AuthorityKeypair.publicKey,
+            1,
+            EventTeamType.Private,
+            EventTeamStatus.Normal,
+            teamUrl,
+            eventTeamCode,
+            true,
+            2,
+            2
+        );
+
+        await assertEventTeamMemberDetailAccount(
+            program,
+            creatorKeypair.publicKey,
+            1,
+            teamMember1Keypair.publicKey,
+            2,
+            EventTeamMemberType.Normal,
+            EventTeamMemberStatus.Normal,
+        );
+    });
+
+    it("Remove Events", async () => {
+        await delay(delayTimeCount);
+
+        await program.removeEventListener(initializeEventEventListener);
+        await program.removeEventListener(updateEventEventListener);
+        await program.removeEventListener(initializeEventTeamEventListener);
+        await program.removeEventListener(updateEventTeamEventListener);
+        await program.removeEventListener(initializeEventTeamMemberEventListener);
+        await program.removeEventListener(updateEventTeamMemberEventListener);
     });
 });
 
