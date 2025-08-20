@@ -60,7 +60,17 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@metaplex-foundation/beet@0.7.2":
+"@metaplex-foundation/beet-solana@^0.4.0":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@metaplex-foundation/beet-solana/-/beet-solana-0.4.1.tgz#255747aa7feee1c20202146a752c057feca1948f"
+  integrity sha512-/6o32FNUtwK8tjhotrvU/vorP7umBuRFvBZrC6XCk51aKidBHe5LPVPA5AjGPbV3oftMfRuXPNd9yAGeEqeCDQ==
+  dependencies:
+    "@metaplex-foundation/beet" ">=0.1.0"
+    "@solana/web3.js" "^1.56.2"
+    bs58 "^5.0.0"
+    debug "^4.3.4"
+
+"@metaplex-foundation/beet@0.7.2", "@metaplex-foundation/beet@>=0.1.0", "@metaplex-foundation/beet@^0.7.1":
   version "0.7.2"
   resolved "https://registry.yarnpkg.com/@metaplex-foundation/beet/-/beet-0.7.2.tgz#fa4726e4cfd4fb6fed6cddc9b5213c1c2a2d0b77"
   integrity sha512-K+g3WhyFxKPc0xIvcIjNyV1eaTVJTiuaHZpig7Xx0MuYRMoJLLvhLTnUXhFdR5Tu2l2QSyKwfyXDgZlzhULqFg==
@@ -69,6 +79,39 @@
     assert "^2.1.0"
     bn.js "^5.2.0"
     debug "^4.3.3"
+
+"@metaplex-foundation/cusper@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@metaplex-foundation/cusper/-/cusper-0.0.2.tgz#dc2032a452d6c269e25f016aa4dd63600e2af975"
+  integrity sha512-S9RulC2fFCFOQraz61bij+5YCHhSO9llJegK8c8Y6731fSi6snUSQJdCUqYS8AIgR0TKbQvdvgSyIIdbDFZbBA==
+
+"@metaplex-foundation/mpl-token-metadata@2.11.0":
+  version "2.11.0"
+  resolved "https://registry.yarnpkg.com/@metaplex-foundation/mpl-token-metadata/-/mpl-token-metadata-2.11.0.tgz#e1118687a88dbfffa2bbd252e490a1ad2f620de7"
+  integrity sha512-pwuufw3QuSk0Z/oOmB7gpnlxiIR0bc5RVHLEpwOJ5/4KHEq7PIFxVsNcwDFzLoZJWTcQdvwZTy0d1J/qJMoxxg==
+  dependencies:
+    "@metaplex-foundation/beet" "^0.7.1"
+    "@metaplex-foundation/beet-solana" "^0.4.0"
+    "@metaplex-foundation/cusper" "^0.0.2"
+    "@solana/spl-token" "^0.3.6"
+    "@solana/web3.js" "^1.66.2"
+    bn.js "^5.2.0"
+    debug "^4.3.4"
+
+"@mirrorworld/sonic.midan@0.0.1":
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/@mirrorworld/sonic.midan/-/sonic.midan-0.0.1.tgz#041d797d28f7a4245e239fe1b8ba9b7dad1c078d"
+  integrity sha512-lEp+//ouneoSHtCC5pNf+Q4xTBsypMdTjxAgJ9xQ2yyYsbmI/XOPooqXjQvZr1u/cvqNzj550C+xkipkUavepA==
+  dependencies:
+    "@coral-xyz/anchor" "^0.29.0"
+    "@metaplex-foundation/beet" "0.7.2"
+    "@metaplex-foundation/mpl-token-metadata" "2.11.0"
+    "@noble/curves" "^1.8.1"
+    "@solana/spl-token" "0.3.10"
+    "@solana/web3.js" "1.98.4"
+    bs58 "^5.0.0"
+    ethereum-cryptography "^2.2.0"
+    tweetnacl "^1.0.3"
 
 "@noble/curves@1.4.2", "@noble/curves@~1.4.0":
   version "1.4.2"
@@ -226,12 +269,22 @@
   dependencies:
     "@solana/codecs" "2.0.0-rc.1"
 
-"@solana/spl-token-metadata@^0.1.6":
+"@solana/spl-token-metadata@^0.1.2", "@solana/spl-token-metadata@^0.1.6":
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/@solana/spl-token-metadata/-/spl-token-metadata-0.1.6.tgz#d240947aed6e7318d637238022a7b0981b32ae80"
   integrity sha512-7sMt1rsm/zQOQcUWllQX9mD2O6KhSAtY1hFR2hfFwgqfFWzSY9E9GDvFVNYUI1F0iQKcm6HmePU9QbKRXTEBiA==
   dependencies:
     "@solana/codecs" "2.0.0-rc.1"
+
+"@solana/spl-token@0.3.10":
+  version "0.3.10"
+  resolved "https://registry.yarnpkg.com/@solana/spl-token/-/spl-token-0.3.10.tgz#70183fe785d9926099be575fb9e5329590e0c0e6"
+  integrity sha512-YFCtV8yC64Ef2w2HKOSNYwcsMt70e/GLMZYkZbdD6tYOlp4NnjUkY1EYxtIbVhsm3LSXoJV43u5chnMni+gr7w==
+  dependencies:
+    "@solana/buffer-layout" "^4.0.0"
+    "@solana/buffer-layout-utils" "^0.2.0"
+    "@solana/spl-token-metadata" "^0.1.2"
+    buffer "^6.0.3"
 
 "@solana/spl-token@0.4.12":
   version "0.4.12"
@@ -244,7 +297,17 @@
     "@solana/spl-token-metadata" "^0.1.6"
     buffer "^6.0.3"
 
-"@solana/web3.js@1.98.4", "@solana/web3.js@^1.32.0", "@solana/web3.js@^1.68.0":
+"@solana/spl-token@^0.3.6":
+  version "0.3.11"
+  resolved "https://registry.yarnpkg.com/@solana/spl-token/-/spl-token-0.3.11.tgz#cdc10f9472b29b39c8983c92592cadd06627fb9a"
+  integrity sha512-bvohO3rIMSVL24Pb+I4EYTJ6cL82eFpInEXD/I8K8upOGjpqHsKUoAempR/RnUlI1qSFNyFlWJfu6MNUgfbCQQ==
+  dependencies:
+    "@solana/buffer-layout" "^4.0.0"
+    "@solana/buffer-layout-utils" "^0.2.0"
+    "@solana/spl-token-metadata" "^0.1.2"
+    buffer "^6.0.3"
+
+"@solana/web3.js@1.98.4", "@solana/web3.js@^1.32.0", "@solana/web3.js@^1.56.2", "@solana/web3.js@^1.66.2", "@solana/web3.js@^1.68.0":
   version "1.98.4"
   resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.98.4.tgz#df51d78be9d865181ec5138b4e699d48e6895bbe"
   integrity sha512-vv9lfnvjUsRiq//+j5pBdXig0IQdtzA0BRZ3bXEP4KaIyF1CcaydWqgyzQgfZMNIsWNWmG+AUHwPy4AHOD6gpw==
@@ -707,7 +770,7 @@ debug@4.3.3:
   dependencies:
     ms "2.1.2"
 
-debug@^4.3.3:
+debug@^4.3.3, debug@^4.3.4:
   version "4.4.1"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.4.1.tgz#e5a8bc6cbc4c6cd3e64308b0693a3d4fa550189b"
   integrity sha512-KcKCqiftBJcZr++7ykoDIEwSa3XWowTfNPo92BYxjXiyYEVrUQh2aLyhxBCwww+heortUFxEJYcRzosstTEBYQ==

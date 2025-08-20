@@ -1,15 +1,15 @@
-use anchor_lang::prelude::*;
 use crate::events::InitializeEventTeamMemberEvent;
 use crate::states::{
     EventDetailAccount, EventTeamDetailAccount, EventTeamMemberDetailAccount,
-    EventTeamMemberStatus, EventTeamMemberType, EventTeamType,
-    ProgramConfigAccount, EVENT_DETAIL_ACCOUNT_PREFIX,
-    EVENT_TEAM_DETAIL_ACCOUNT_PREFIX, EVENT_TEAM_MEMBER_DETAIL_ACCOUNT_PREFIX,
+    EventTeamMemberStatus, EventTeamMemberType, EventTeamType, ProgramConfigAccount,
+    EVENT_DETAIL_ACCOUNT_PREFIX, EVENT_TEAM_DETAIL_ACCOUNT_PREFIX,
+    EVENT_TEAM_MEMBER_DETAIL_ACCOUNT_PREFIX,
 };
 use crate::utils::{
-    check_code, check_have_code, check_is_event_halted, check_is_event_team_halted, check_is_program_working, check_member_limit, check_program_id,
-    check_team_limit, try_get_remaining_account_info,
+    check_code, check_have_code, check_is_event_halted, check_is_event_team_halted,
+    check_is_program_working, check_member_limit, check_program_id, try_get_remaining_account_info,
 };
+use anchor_lang::prelude::*;
 
 #[repr(C)]
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
@@ -97,13 +97,6 @@ pub fn handle_initialize_event_team_member<'info>(
 
     check_is_event_halted(event_detail.event_status.clone())?;
 
-    if event_detail.team_limit.have_it {
-        check_team_limit(
-            event_detail.total_teams.checked_add(1).unwrap(),
-            event_detail.team_limit.value,
-        )?;
-    };
-
     if event_detail.member_limit.have_it {
         check_member_limit(
             event_detail.total_members.checked_add(1).unwrap(),
@@ -152,10 +145,10 @@ pub fn handle_initialize_event_team_member<'info>(
         timestamp,
         creator_key: params.creator_key,
         member: ctx.accounts.member.key(),
-        event_team_index: event_detail.total_teams
+        event_team_index: event_detail.total_teams,
     };
 
     emit!(event);
-    
+
     Ok(())
 }

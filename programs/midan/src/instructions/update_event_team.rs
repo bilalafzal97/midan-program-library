@@ -28,9 +28,6 @@ pub struct UpdateEventTeamInputParams {
 #[derive(Accounts)]
 #[instruction(params: UpdateEventTeamInputParams)]
 pub struct UpdateEventTeamInputAccounts<'info> {
-    #[account(mut)]
-    pub fee_and_rent_payer: Signer<'info>,
-
     pub authority: Signer<'info>,
 
     #[account(
