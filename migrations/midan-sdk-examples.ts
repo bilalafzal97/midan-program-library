@@ -226,18 +226,18 @@ const creatorKey = new PublicKey("FpHTKievbczGPvKiPaNyfZSHf9ewa1h98FiTcPrYWsgY")
     //     ]
     // );
 
-    await updateEventTeamMember(
-        feeAndRentPayerKeypair.publicKey,
-        team2AuthorityKeypair.publicKey,
-        teamMember1Keypair.publicKey,
-        creatorKey,
-        2,
-        EventTeamMemberStatus.Normal,
-        [
-            feeAndRentPayerKeypair,
-            team2AuthorityKeypair
-        ]
-    );
+    // await updateEventTeamMember(
+    //     feeAndRentPayerKeypair.publicKey,
+    //     team2AuthorityKeypair.publicKey,
+    //     teamMember1Keypair.publicKey,
+    //     creatorKey,
+    //     2,
+    //     EventTeamMemberStatus.Normal,
+    //     [
+    //         feeAndRentPayerKeypair,
+    //         team2AuthorityKeypair
+    //     ]
+    // );
 
     await delay(timeDelay);
 
@@ -504,9 +504,6 @@ async function updateEventTeamMember(
         teamIndex,
         eventTeamMemberStatus
     );
-
-
-    console.log(tx.instructions)
 
     await midanLib.addFeePayerAndRecentBlockHashInTransaction(tx, feeAndRentPayer);
 

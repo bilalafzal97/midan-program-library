@@ -13,7 +13,7 @@
         "nanoid": "3.3.4",
         "tweetnacl": "^1.0.3",
         "@metaplex-foundation/beet": "0.7.2",
-        "@mirrorworld/sonic.midan": "0.0.1"
+        "@mirrorworld/sonic.midan": "0.0.2"
     },
     "devDependencies": {
         "@types/bn.js": "^5.1.0",

@@ -98,10 +98,10 @@
     bn.js "^5.2.0"
     debug "^4.3.4"
 
-"@mirrorworld/sonic.midan@0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@mirrorworld/sonic.midan/-/sonic.midan-0.0.1.tgz#041d797d28f7a4245e239fe1b8ba9b7dad1c078d"
-  integrity sha512-lEp+//ouneoSHtCC5pNf+Q4xTBsypMdTjxAgJ9xQ2yyYsbmI/XOPooqXjQvZr1u/cvqNzj550C+xkipkUavepA==
+"@mirrorworld/sonic.midan@0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@mirrorworld/sonic.midan/-/sonic.midan-0.0.2.tgz#ad06dc685429aade967d0ad7bc7504e7a4f1c8f0"
+  integrity sha512-Wplw89wuOrngKZ3lUHZgAR5pO02+V5k9tJzWAUazgtZP7swEP0OE40aE5dzJ54URvzP7TEZIGVTrJwyzXtiOrQ==
   dependencies:
     "@coral-xyz/anchor" "^0.29.0"
     "@metaplex-foundation/beet" "0.7.2"
